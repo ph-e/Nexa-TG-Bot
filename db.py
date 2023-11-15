@@ -7,6 +7,7 @@ class DataBase:
     def __init__(self):
         self.conn = sqlite3.connect(config.table)
         self.cursor = self.conn.cursor()
+
     def readExcelToDb(self, df):
         '''Получаем значение по ASIN с бд и обновляем запись!'''
 
@@ -60,7 +61,7 @@ class DataBase:
 
         if bool(len(result_data)):
             # Конвертируем данные в DataFrame pandas
-            df = pd.DataFrame(result_data, columns=['Researcher', 'Category', 'ASIN', 'SKU', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price', 'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant', 'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4', 'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC'])
+            df = pd.DataFrame(result_data, columns=['Researcher', 'Category', 'ASIN', 'SKU', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price', 'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant', 'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4', 'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC', 'Exception'])
         
             # Записываем данные в файл Excel (XLSX)
             df.to_excel('result.xlsx', index=False, engine='openpyxl')
