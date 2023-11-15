@@ -21,9 +21,9 @@ async def ASIN(msg: types.Message):
 
 async def found(msg: types.Message, state: StateWorker):
     user_id = msg.from_user.id
-    data = db.foundAsin(msg.text)
     await state.finish()
-    if bool(len(db.foundAsin(msg.text))):
+    asin_list = msg.text.splitlines()
+    if bool(len(db.foundAsin(asin_list))):
         await msg.reply(f'''ASIN успешно найден, мы формируем файл с информацией он нем''')
         file_path = 'result.xlsx'
         with open(file_path, 'rb') as file:

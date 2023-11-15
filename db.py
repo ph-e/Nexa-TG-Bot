@@ -7,7 +7,6 @@ class DataBase:
     def __init__(self):
         self.conn = sqlite3.connect(config.table)
         self.cursor = self.conn.cursor()
-
     def readExcelToDb(self, df):
         '''Получаем значение по ASIN с бд и обновляем запись!'''
 
@@ -20,27 +19,18 @@ class DataBase:
                 return  # Прерываем выполнение функции, так как есть пустые значения ASIN
 
             # Проверяем наличие ASIN в базе данных
-            for index, row in df.iterrows():
-                asin = row['ASIN']
+            for asin in asin_column.unique():
                 result = self.cursor.execute("SELECT * FROM `Table` WHERE `ASIN` = ?", (asin,))
                 data = result.fetchall()
 
                 if bool(len(data)):
-                    # Запись найдена, проводим обновление
-                    existing_data = data[0]
-                    columns_to_check = ['Researcher', 'Category', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price',
-                     'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant',
-                     'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4',
-                     'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC']
-                    for col_index, value in enumerate(columns_to_check):
-                        if str(row[value]) != str(existing_data[col_index]):
-                            self.cursor.execute(f"UPDATE `table` SET {value} = ? WHERE ASIN = ?", (row[value], asin))
-                            self.conn.commit()
-
-                else:
-                    # Добавляем новые данные
-                    df.to_sql(config.listingsTable, self.conn, if_exists='append', index=False)
+                    # Удаляем существующую запись с заданным ASIN
+                    self.cursor.execute("DELETE FROM `Table` WHERE `ASIN` = ?", (asin,))
                     self.conn.commit()
+
+            # Добавляем новые данные из DataFrame
+            df.to_sql(config.listingsTable, self.conn, if_exists='append', index=False)
+            self.conn.commit()
     
     def userExists(self, user_id):
         '''Проверяем есть ли пользователь в базе'''
@@ -59,15 +49,23 @@ class DataBase:
     
     def foundAsin(self, asin):
         '''Получаем значение по ASIN с бд!'''
-        result = self.cursor.execute("SELECT * FROM `Table` WHERE `ASIN` = ?", (asin,))
-        data = result.fetchall()
-        if bool(len(data)):
+        result_data = []
+
+        for el in asin:
+            result = self.cursor.execute("SELECT * FROM `Table` WHERE `ASIN` = ?", (el,))
+            data = result.fetchall()
+        
+            if bool(len(data)):
+                result_data.extend(data)
+
+        if bool(len(result_data)):
             # Конвертируем данные в DataFrame pandas
-            df = pd.DataFrame(data, columns=['Researcher', 'Category', 'ASIN', 'SKU', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price', 'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant', 'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4', 'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC'])
-            
+            df = pd.DataFrame(result_data, columns=['Researcher', 'Category', 'ASIN', 'SKU', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price', 'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant', 'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4', 'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC'])
+        
             # Записываем данные в файл Excel (XLSX)
             df.to_excel('result.xlsx', index=False, engine='openpyxl')
-        return data
+
+        return result_data
 
     def addUser(self, user_id):
         '''Добавляем пользователя в базу'''
