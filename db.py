@@ -66,6 +66,19 @@ class DataBase:
             df.to_excel('result.xlsx', index=False, engine='openpyxl')
 
         return result_data
+    
+    def getExcel(self, name):
+        result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
+        data = result.fetchall()
+        
+        if bool(len(data)):
+            # Конвертируем данные в DataFrame pandas
+            df = pd.DataFrame(data, columns=['Researcher', 'Category', 'ASIN', 'SKU', 'Link', 'Price_Amazon', 'Provider', 'Price', 'Shipping_price', 'Stock', 'Days', 'Supplier', 'Tax', 'Margin', 'Roy', 'Formula', 'Handling', 'Merchant', 'Variation', 'Title_1', 'Title_2', 'Bullet_1', 'Bullet_2', 'Bullet_3', 'Bullet_4', 'IMG_1', 'IMG_2', 'IMG_3', 'IMG_4', 'UPC'])
+        
+            # Записываем данные в файл Excel (XLSX)
+            df.to_excel('tables.xlsx', index=False, engine='openpyxl')
+        
+        return data
 
     def addUser(self, user_id):
         '''Добавляем пользователя в базу'''
