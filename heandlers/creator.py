@@ -91,6 +91,23 @@ async def prep(msg: types.Message, state: StateCreator):
     print(name)
     print(prep)
     await state.finish()
+
+async def getPrep(msg: types.Message):
+    user_id = msg.from_user.id
+    if await db.isCreator(user_id):
+        try:
+            name = msg.text.split()[1]
+        except (IndexError, ValueError):
+            await msg.reply(f'''Неправильный формат команды. Используйте /prep <name store>''')
+            return
+        if bool(len(await db.checkStore(name))):
+            message_text = "\n".join(row[0] for row in await db.getPrep(name))
+            await msg.reply(message_text)
+        else:
+            await msg.reply(f'''Магазин не найден!!!''')
+    else:
+        await msg.reply(f'''Отказано в доступе! Вы не являетесь действующим сотрудником, либо у вас нет полходящей роли! Дождитесь выдачи и попробуйте еще раз.''')
+
     
 
 def heandlerCreator(dp: Dispatcher):
@@ -100,3 +117,4 @@ def heandlerCreator(dp: Dispatcher):
     dp.register_message_handler(recount, commands=["recount"])
     dp.register_message_handler(getStore, state=StateCreator.Store)
     dp.register_message_handler(prep, state=StateCreator.Provider)
+    dp.register_message_handler(getPrep, commands=["prep"])

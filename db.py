@@ -69,6 +69,7 @@ class DataBase:
         return result_data
     
     async def getExcel(self, name):
+        '''Получаем excel файл с товарами определенного магазина'''
         result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
         
@@ -82,6 +83,7 @@ class DataBase:
         return data
     
     async def checkStore(self, name):
+        '''Проверяем существует ли магазин'''
         result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
 
@@ -93,8 +95,16 @@ class DataBase:
         return self.conn.commit()
     
     async def changeRole(self, user_id, role):
+        '''Изменяем роль пользователя'''
         self.cursor.execute('UPDATE `users` SET `role` = ? WHERE `user_id` = ?', (role, user_id))
         return self.conn.commit()
+    
+    async def getPrep(self, name):
+        '''Получаем преп'''
+        result = self.cursor.execute(f"SELECT DISTINCT Supplier FROM `table` WHERE SKU LIKE '{name}%'")
+        data = result.fetchall()
+
+        return data
 
     def close(self):
         self.conn.close()
