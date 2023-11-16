@@ -86,7 +86,7 @@ async def getStore(msg: types.Message, state: StateCreator):
 async def prep(msg: types.Message, state: StateCreator):
     prep = msg.text.splitlines()
     await msg.reply(f'''Мы получили от вас информацию, ожидайте обновления цен!''')
-    data = await state.get_data()  # Await get_data() first
+    data = await state.get_data()
     name = data.get('store')
     print(name)
     print(prep)
