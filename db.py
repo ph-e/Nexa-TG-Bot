@@ -8,7 +8,7 @@ class DataBase:
         self.conn = sqlite3.connect(config.table)
         self.cursor = self.conn.cursor()
 
-    def readExcelToDb(self, df):
+    async def readExcelToDb(self, df):
         '''Получаем значение по ASIN с бд и обновляем запись!'''
 
         # Проверяем наличие столбца ASIN в DataFrame
@@ -33,22 +33,22 @@ class DataBase:
             df.to_sql(config.listingsTable, self.conn, if_exists='append', index=False)
             self.conn.commit()
     
-    def userExists(self, user_id):
+    async def userExists(self, user_id):
         '''Проверяем есть ли пользователь в базе'''
         result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ?", (user_id,))
         return bool(len(result.fetchall()))
     
-    def isEmployeeActive(self, user_id):
+    async def isEmployeeActive(self, user_id):
         '''Проверяем работает ли у нас пользователь!'''
         result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ? AND (`role` = 'WORKER' OR `role` = 'CREATOR')", (user_id,))
         return bool(len(result.fetchall()))
     
-    def isCreator(self, user_id):
+    async def isCreator(self, user_id):
         '''Проверяем является ли пользователь создателем!'''
         result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ? AND `role` = 'CREATOR'", (user_id,))
         return bool(len(result.fetchall()))
     
-    def foundAsin(self, asin):
+    async def foundAsin(self, asin):
         '''Получаем значение по ASIN с бд!'''
         result_data = []
 
@@ -68,7 +68,7 @@ class DataBase:
 
         return result_data
     
-    def getExcel(self, name):
+    async def getExcel(self, name):
         result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
         
@@ -80,13 +80,19 @@ class DataBase:
             df.to_excel('tables.xlsx', index=False, engine='openpyxl')
         
         return data
+    
+    async def checkStore(self, name):
+        result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
+        data = result.fetchall()
 
-    def addUser(self, user_id):
+        return data
+
+    async def addUser(self, user_id):
         '''Добавляем пользователя в базу'''
         self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES (?)", (user_id,))
         return self.conn.commit()
     
-    def changeRole(self, user_id, role):
+    async def changeRole(self, user_id, role):
         self.cursor.execute('UPDATE `users` SET `role` = ? WHERE `user_id` = ?', (role, user_id))
         return self.conn.commit()
 

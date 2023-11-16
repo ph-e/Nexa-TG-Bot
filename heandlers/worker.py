@@ -12,7 +12,7 @@ class StateWorker(StatesGroup):
 
 async def ASIN(msg: types.Message):
     user_id = msg.from_user.id
-    if db.isEmployeeActive(user_id):
+    if await db.isEmployeeActive(user_id):
         await StateWorker.foundAsin.set()
         await msg.reply(f'''Отправьте мне ASIN для поиска!''')
     else:
@@ -23,7 +23,7 @@ async def found(msg: types.Message, state: StateWorker):
     user_id = msg.from_user.id
     await state.finish()
     asin_list = msg.text.splitlines()
-    if bool(len(db.foundAsin(asin_list))):
+    if bool(len(await db.foundAsin(asin_list))):
         await msg.reply(f'''ASIN успешно найден, мы формируем файл с информацией он нем''')
         file_path = 'result.xlsx'
         with open(file_path, 'rb') as file:
@@ -37,7 +37,7 @@ async def addItem(msg: types.Message):
     # Проверяем, что это файл Excel (xlsx)
     if msg.document.mime_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         user_id = msg.from_user.id
-        if db.isEmployeeActive(user_id):
+        if await db.isEmployeeActive(user_id):
 
             # Получаем информацию о файле
             file_info = await bot.get_file(msg.document.file_id)
@@ -55,14 +55,13 @@ async def addItem(msg: types.Message):
             
             # Сохраняем таблицу в бд!
             df = pd.read_excel(msg.document.file_name)
-            db.readExcelToDb(df)
+            await db.readExcelToDb(df)
             os.remove(save_path)
             await msg.reply(f'''Ваши данные успешно перенесены в нашу БД!''')
         else:
             await msg.reply(f'''Отказано в доступе! Вы не являетесь действующим сотрудником, либо у вас нет полходящей роли! Дождитесь выдачи и попробуйте еще раз.''')
     else:
         await msg.reply(f'''Мы не можем загрузить ваш файл!''')
-
 
 def heandlersWorker(dp: Dispatcher):
     dp.register_message_handler(ASIN, commands=["ASIN"], state=None)
