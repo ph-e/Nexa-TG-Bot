@@ -88,8 +88,8 @@ async def prep(msg: types.Message, state: StateCreator):
     await msg.reply(f'''Мы получили от вас информацию, ожидайте обновления цен!''')
     data = await state.get_data()  # Await get_data() first
     name = data.get('store')
-    print(name)
-    print(prep)
+    await msg.reply(f'''Эта функция будет дописана другим сотрудником по формуле пересчета! Ожидайте готовности''')
+    '''Тут будет код обращения к бд'''
     await state.finish()
 
 async def getPrep(msg: types.Message):
