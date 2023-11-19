@@ -7,6 +7,7 @@ import os
 class StateCreator(StatesGroup):
     Store = State()
     Provider = State()
+    Dlt = State()
 
 async def getDB(msg: types.Message):
     user_id = msg.from_user.id
@@ -108,6 +109,21 @@ async def getPrep(msg: types.Message):
     else:
         await msg.reply(f'''Отказано в доступе! Вы не являетесь действующим сотрудником, либо у вас нет полходящей роли! Дождитесь выдачи и попробуйте еще раз.''')
 
+
+async def dltAsin(msg: types.Message):
+    user_id = msg.from_user.id
+    if await db.isCreator(user_id):
+        await StateCreator.Dlt.set()
+        await msg.reply(f'''Введите асины для удаления, если их несколько, то переходите на новую строку после каждого введенного асина''')
+    else:
+        await msg.reply(f'''Отказано в доступе! Вы не являетесь действующим сотрудником, либо у вас нет полходящей роли! Дождитесь выдачи и попробуйте еще раз.''')
+
+async def dlt(msg: types.Message, state: StateCreator):
+    await state.finish()
+    asin_list = msg.text.splitlines()
+    if db.dltEl(asin_list):
+        await msg.reply(f'''Элементы успешно удалены!''')
+
     
 
 def heandlerCreator(dp: Dispatcher):
@@ -118,3 +134,5 @@ def heandlerCreator(dp: Dispatcher):
     dp.register_message_handler(getStore, state=StateCreator.Store)
     dp.register_message_handler(prep, state=StateCreator.Provider)
     dp.register_message_handler(getPrep, commands=["prep"])
+    dp.register_message_handler(dltAsin, commands=["dlt"])
+    dp.register_message_handler(dlt, state=StateCreator.Dlt)

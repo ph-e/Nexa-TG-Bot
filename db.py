@@ -105,6 +105,12 @@ class DataBase:
         data = result.fetchall()
 
         return data
+    
+    async def dltEl(self, asin):
+        for el in asin:
+            self.cursor.execute("DELETE FROM `Table` WHERE `ASIN` = ?", (el,))
+        return True
+
 
     def close(self):
         self.conn.close()
