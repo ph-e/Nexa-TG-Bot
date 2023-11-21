@@ -121,7 +121,7 @@ async def dltAsin(msg: types.Message):
 async def dlt(msg: types.Message, state: StateCreator):
     await state.finish()
     asin_list = msg.text.splitlines()
-    if db.dltEl(asin_list):
+    if await db.dltEl(asin_list):
         await msg.reply(f'''Элементы успешно удалены!''')
 
     
