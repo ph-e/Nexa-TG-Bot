@@ -30,22 +30,22 @@ class DataBase:
                     self.conn.commit()
 
             # Добавляем новые данные из DataFrame
-            df.to_sql(config.listingsTable, self.conn, if_exists='append', index=False)
+            df.to_sql("Table", self.conn, if_exists='append', index=False)
             self.conn.commit()
     
     async def userExists(self, user_id):
         '''Проверяем есть ли пользователь в базе'''
-        result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ?", (user_id,))
+        result = self.cursor.execute("SELECT * FROM `Users` WHERE `user_id` = ?", (user_id,))
         return bool(len(result.fetchall()))
     
     async def isEmployeeActive(self, user_id):
         '''Проверяем работает ли у нас пользователь!'''
-        result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ? AND (`role` = 'WORKER' OR `role` = 'CREATOR')", (user_id,))
+        result = self.cursor.execute("SELECT * FROM `Users` WHERE `user_id` = ? AND (`role` = 'WORKER' OR `role` = 'CREATOR')", (user_id,))
         return bool(len(result.fetchall()))
     
     async def isCreator(self, user_id):
         '''Проверяем является ли пользователь создателем!'''
-        result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ? AND `role` = 'CREATOR'", (user_id,))
+        result = self.cursor.execute("SELECT * FROM `Users` WHERE `user_id` = ? AND `role` = 'CREATOR'", (user_id,))
         return bool(len(result.fetchall()))
     
     async def foundAsin(self, asin):
@@ -70,7 +70,7 @@ class DataBase:
     
     async def getExcel(self, name):
         '''Получаем excel файл с товарами определенного магазина'''
-        result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
+        result = self.cursor.execute(f"SELECT * FROM `Table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
         
         if bool(len(data)):
@@ -84,24 +84,24 @@ class DataBase:
     
     async def checkStore(self, name):
         '''Проверяем существует ли магазин'''
-        result = self.cursor.execute(f"SELECT * FROM `table` WHERE SKU LIKE '{name}%'")
+        result = self.cursor.execute(f"SELECT * FROM `Table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
 
         return data
 
     async def addUser(self, user_id):
         '''Добавляем пользователя в базу'''
-        self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES (?)", (user_id,))
+        self.cursor.execute("INSERT INTO `Users` (`user_id`) VALUES (?)", (user_id,))
         return self.conn.commit()
     
     async def changeRole(self, user_id, role):
         '''Изменяем роль пользователя'''
-        self.cursor.execute('UPDATE `users` SET `role` = ? WHERE `user_id` = ?', (role, user_id))
+        self.cursor.execute('UPDATE `Users` SET `role` = ? WHERE `user_id` = ?', (role, user_id))
         return self.conn.commit()
     
     async def getPrep(self, name):
         '''Получаем преп'''
-        result = self.cursor.execute(f"SELECT DISTINCT Supplier FROM `table` WHERE SKU LIKE '{name}%'")
+        result = self.cursor.execute(f"SELECT DISTINCT Supplier FROM `Table` WHERE SKU LIKE '{name}%'")
         data = result.fetchall()
 
         return data
